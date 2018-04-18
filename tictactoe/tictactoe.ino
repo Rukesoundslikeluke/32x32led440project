@@ -1,9 +1,14 @@
 //TIC-TAC-TOE
 #include <Adafruit_GFX.h>   // Core graphics library
 #include <RGBmatrixPanel.h> // Hardware-specific library
+#include <LiquidCrystal.h> // Lcd library
+
+//LCD Screen
+const int rs = 45, en = 47, d4 = 49, d5 = 44, d6 = 46, d7 = 48;
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 //RGB Board
-#define CLK 8  
+#define CLK 11  
 #define OE  9
 #define LAT 10
 #define A   A0
@@ -12,12 +17,17 @@
 #define D   A3
 
 //Analog Stick
-#define YPIN  A4
-#define XPIN  A5
-#define BTN 12
+#define YPIN  A14
+#define XPIN  A15
+#define BTN 39
 int xPos = 0;
 int yPos = 0;
 int btnState = 0;
+
+//Analog Stick2
+#define YPIN2  A12
+#define XPIN2  A13
+#define BTN2 35
 
 //Pixel mov
 int pix = 1;
@@ -32,9 +42,11 @@ bool openspc = true;
 bool turn = false;  //false = X turn
 int turnNum = 0;
 bool fixer = false;
+int xscore = 0;
+int oscore = 0;
 
 //How the rgb board works
-RGBmatrixPanel matrix(A, B, C, D, CLK, LAT, OE, false);
+RGBmatrixPanel matrix(A, B, C, D, CLK, LAT, OE, true);
 
 //MESSAGES
 void drawgame(){  //Prints draw in middle of screen
@@ -60,6 +72,9 @@ void owin(){  //Prints O WIN in middle of screen
   matrix.println("O WIN");
   delay(2100);
   matrix.fillScreen(matrix.Color333(0, 0, 0));
+  oscore++;
+  lcd.setCursor(9, 1);
+  lcd.print(oscore);
 }
 void xwin(){  //Prints X WIN in middle of screen
   turnNum = 0;
@@ -72,6 +87,74 @@ void xwin(){  //Prints X WIN in middle of screen
   matrix.println("X WIN");
   delay(2100);
   matrix.fillScreen(matrix.Color333(0, 0, 0));
+  xscore++;
+  lcd.setCursor(9, 0);
+  lcd.print(xscore);
+}
+
+//DRAW FUNCTIONS
+//Think of drawing as a normal array 
+//i.e. drawx(0,1) - > | |x| |
+//                    | | | |
+//                    | | |o| < - drawo(2,2)
+//
+//Top left led of each array section
+//  (0,0) |(11,0) |(22,0)
+//  (0,11)|(11,11)|(22,11)
+//  (0,22)|(11,22)|(22,22)
+void drawx(int x,int y){  //Draws an x at given point
+  int xcoord = 0, ycoord = 0;
+  if(x == 1){ xcoord+= 11;}
+  else if(x == 2){ xcoord+=22;}
+  if(y == 1){ ycoord+= 11;}
+  else if(y == 2){ycoord+= 22;}
+  matrix.drawLine(xcoord, ycoord, xcoord+9, ycoord+9, matrix.Color333(0, 0, 1));
+  matrix.drawLine(xcoord, ycoord+9, xcoord+9, ycoord, matrix.Color333(0, 0, 1));
+  mark(1,x,y);
+}
+void drawo(int x,int y){  //Draws an o at given point
+  int xcoord = 0, ycoord = 0;
+  if(x == 1){ xcoord+= 11;}
+  else if(x == 2){ xcoord+=22;}
+  if(y == 1){ ycoord+= 11;}
+  else if(y == 2){ycoord+= 22;}
+  //Sides of Circle - order(top,left,right,bottom)
+  matrix.drawLine(xcoord+3, ycoord, xcoord+6, ycoord, matrix.Color333(0, 0, 1));
+  matrix.drawLine(xcoord, ycoord+3, xcoord, ycoord+6, matrix.Color333(0, 0, 1));
+  matrix.drawLine(xcoord+9, ycoord+3, xcoord+9, ycoord+6, matrix.Color333(0, 0, 1));
+  matrix.drawLine(xcoord+3, ycoord+9, xcoord+6, ycoord+9, matrix.Color333(0, 0, 1));
+  //Diagonals of Circle - order(tl,tr,bl,br)
+  matrix.drawLine(xcoord+1, ycoord+2, xcoord+2, ycoord+1, matrix.Color333(0, 0, 1));
+  matrix.drawLine(xcoord+7, ycoord+1, xcoord+8, ycoord+2, matrix.Color333(0, 0, 1));
+  matrix.drawLine(xcoord+1, ycoord+7, xcoord+2, ycoord+8, matrix.Color333(0, 0, 1));
+  matrix.drawLine(xcoord+7, ycoord+8, xcoord+8, ycoord+7, matrix.Color333(0, 0, 1));
+  mark(2,x,y);
+}
+void drawcursor(int d, int x, int y){ // d = color option (0 -> red |1 -> green)
+  int xcoord = 0, ycoord = 0;
+  if(x == 1){ xcoord+= 11;}
+  else if(x == 2){ xcoord+=22;}
+  if(y == 1){ ycoord+= 11;}
+  else if(y == 2){ycoord+= 22;}
+  if(d == 0){ matrix.drawRect(xcoord, ycoord, 10, 10, matrix.Color333(0, 0, 0));}
+  else if(d == 2){matrix.drawRect(xcoord, ycoord, 10, 10, matrix.Color333(7, 0, 0));}
+  else{ matrix.drawRect(xcoord, ycoord, 10, 10, matrix.Color333(0, 1, 0));}
+ }
+void drawgrid(){
+  matrix.drawLine(10, 0, 10, 31, matrix.Color333(1, 0, 1));
+  matrix.drawLine(21, 0, 21, 31, matrix.Color333(1, 0, 1));
+  matrix.drawLine(0, 10, 31, 10, matrix.Color333(1, 0, 1));
+  matrix.drawLine(0, 21, 31, 21, matrix.Color333(1, 0, 1));
+}
+void drawboard(int x, int y){
+  drawgrid();
+  for(int i=0;i<3;++i){
+    for(int j=0;j<3;++j){
+      if(i == x && j == y){}
+      else if(board[i][j] == 1){drawx(i,j);}
+      else if(board[i][j] == 2){drawo(i,j);}
+  }
+ }
 }
 
 //GAME STATE FUNCTIONS
@@ -152,87 +235,34 @@ void xwin(){  //Prints X WIN in middle of screen
   if(mov == true){ drawcursor(0,cix,ciy);}  //if cursor moved then "erase" prev cursor position
  }
 
-//DRAW FUNCTIONS
-//Think of drawing as a normal array 
-//i.e. drawx(0,1) - > | |x| |
-//                    | | | |
-//                    | | |o| < - drawo(2,2)
-//
-//Top left led of each array section
-//  (0,0) |(11,0) |(22,0)
-//  (0,11)|(11,11)|(22,11)
-//  (0,22)|(11,22)|(22,22)
-void drawx(int x,int y){  //Draws an x at given point
-  int xcoord = 0, ycoord = 0;
-  if(x == 1){ xcoord+= 11;}
-  else if(x == 2){ xcoord+=22;}
-  if(y == 1){ ycoord+= 11;}
-  else if(y == 2){ycoord+= 22;}
-  matrix.drawLine(xcoord, ycoord, xcoord+9, ycoord+9, matrix.Color333(0, 0, 1));
-  matrix.drawLine(xcoord, ycoord+9, xcoord+9, ycoord, matrix.Color333(0, 0, 1));
-  mark(1,x,y);
-}
-void drawo(int x,int y){  //Draws an o at given point
-  int xcoord = 0, ycoord = 0;
-  if(x == 1){ xcoord+= 11;}
-  else if(x == 2){ xcoord+=22;}
-  if(y == 1){ ycoord+= 11;}
-  else if(y == 2){ycoord+= 22;}
-  //Sides of Circle - order(top,left,right,bottom)
-  matrix.drawLine(xcoord+3, ycoord, xcoord+6, ycoord, matrix.Color333(0, 0, 1));
-  matrix.drawLine(xcoord, ycoord+3, xcoord, ycoord+6, matrix.Color333(0, 0, 1));
-  matrix.drawLine(xcoord+9, ycoord+3, xcoord+9, ycoord+6, matrix.Color333(0, 0, 1));
-  matrix.drawLine(xcoord+3, ycoord+9, xcoord+6, ycoord+9, matrix.Color333(0, 0, 1));
-  //Diagonals of Circle - order(tl,tr,bl,br)
-  matrix.drawLine(xcoord+1, ycoord+2, xcoord+2, ycoord+1, matrix.Color333(0, 0, 1));
-  matrix.drawLine(xcoord+7, ycoord+1, xcoord+8, ycoord+2, matrix.Color333(0, 0, 1));
-  matrix.drawLine(xcoord+1, ycoord+7, xcoord+2, ycoord+8, matrix.Color333(0, 0, 1));
-  matrix.drawLine(xcoord+7, ycoord+8, xcoord+8, ycoord+7, matrix.Color333(0, 0, 1));
-  mark(2,x,y);
-}
-void drawcursor(int d, int x, int y){ // d = color option (0 -> red |1 -> green)
-  int xcoord = 0, ycoord = 0;
-  if(x == 1){ xcoord+= 11;}
-  else if(x == 2){ xcoord+=22;}
-  if(y == 1){ ycoord+= 11;}
-  else if(y == 2){ycoord+= 22;}
-  if(d == 0){ matrix.drawRect(xcoord, ycoord, 10, 10, matrix.Color333(0, 0, 0));}
-  else if(d == 2){matrix.drawRect(xcoord, ycoord, 10, 10, matrix.Color333(7, 0, 0));}
-  else{ matrix.drawRect(xcoord, ycoord, 10, 10, matrix.Color333(0, 1, 0));}
- }
-void drawgrid(){
-  matrix.drawLine(10, 0, 10, 31, matrix.Color333(1, 0, 1));
-  matrix.drawLine(21, 0, 21, 31, matrix.Color333(1, 0, 1));
-  matrix.drawLine(0, 10, 31, 10, matrix.Color333(1, 0, 1));
-  matrix.drawLine(0, 21, 31, 21, matrix.Color333(1, 0, 1));
-}
-void drawboard(int x, int y){
-  drawgrid();
-  for(int i=0;i<3;++i){
-    for(int j=0;j<3;++j){
-      if(i == x && j == y){}
-      else if(board[i][j] == 1){drawx(i,j);}
-      else if(board[i][j] == 2){drawo(i,j);}
-  }
- }
-}
-
-
 void setup() {
   matrix.begin();
 // initialize serial communications at 9600 bps:
   Serial.begin(9600); 
   pinMode(XPIN, INPUT);
   pinMode(YPIN, INPUT);
+  pinMode(XPIN2, INPUT);
+  pinMode(YPIN2, INPUT);
   //activate pull-up resistor on the push-button pin
   pinMode(BTN, INPUT_PULLUP);
+  pinMode(BTN2, INPUT_PULLUP);
+  lcd.begin(16, 2);
+  // Print a message to the LCD.
+  lcd.print("Player X:");
+  lcd.setCursor(0, 1);
+  lcd.print("Player O:");
 }
-
-
 void loop() {
-  xPos = analogRead(XPIN);//Read joystick x coordinate
-  yPos = analogRead(YPIN);//Read joystick y coordinate
-  btnState = digitalRead(BTN);//Read button input
+  if(turn == false){
+    xPos = analogRead(XPIN);//Read joystick x coordinate
+    yPos = analogRead(YPIN);//Read joystick y coordinate
+    btnState = digitalRead(BTN);//Read button input
+  }
+  else{
+    xPos = analogRead(XPIN2);//Read joystick x coordinate
+    yPos = analogRead(YPIN2);//Read joystick y coordinate
+    btnState = digitalRead(BTN2);//Read button input
+  }
   movecursor();//Cursor movement
   
   if(btnState == 0){//BTN Pressed
@@ -268,7 +298,5 @@ void loop() {
     drawboard(pix,piy);
     drawcursor(1,pix,piy);
   }
- 
-  
   delay(100); // adds some delay between reads
 }

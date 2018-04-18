@@ -1,13 +1,8 @@
-TODO: SPLIT THIS FUCKING CODE UP FFS
+TODO: 
+-> SPLIT THIS CODE UP FFS
 -> Add newgame/game selection
--> Check win for TTT
--> Draw win lines for TTT
--> Create winner sequence for X and O(i.e."X WINNER" or maybe funny text)
--> Sleep
--> Play Farcry 5
 -> Add comments for the team
 
-"New Kids On The Block
-Had a bunch of hits
-Chinese food makes me sick"
-~Frank Sinatra
+"The square root of 69 is 8 something,
+ right? / Cause I've been tryna work it out."
+~Danny Devito
