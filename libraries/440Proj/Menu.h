@@ -1,6 +1,7 @@
 #ifndef MENU_H
 #define MENU_H
 #include <Globals.h>
+#include <Music.h>
 //Mapping for joystick
 int mxPos = 0;
 int myPos = 0;
@@ -54,7 +55,7 @@ int menu(){
     matrix.setCursor(1, 12);
     matrix.print("Pong");
     matrix.setCursor(1, 23);
-    matrix.print("Sleep");
+    matrix.print("Song>");
     while (true){
         mxPos = analogRead(XPIN);//Read joystick x coordinate
         myPos = analogRead(YPIN);//Read joystick y coordinate
@@ -77,6 +78,11 @@ int menu(){
                 lcd.clear();
                 delay(300);
                 return 1;
+            }
+            else if(mpiy == 2){
+                drawmenucursor(0,mpiy);
+                sendCommand(CMD_NEXT_SONG,0);
+                delay(100);
             }
         }
         delay(100); // adds some delay between reads

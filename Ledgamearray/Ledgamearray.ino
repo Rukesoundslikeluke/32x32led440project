@@ -10,7 +10,7 @@ LiquidCrystal lcd(RS, EN, D4, D5, D6, D7);
 //RGB LED Matrix
 RGBmatrixPanel matrix(A, B, C, D, CLK, LAT, OE, false);
 // MUSIC Board
-SoftwareSerial mySerial(ARDUINO_RX, ARDUINO_TX);
+SoftwareSerial mp3(ARDUINO_RX, ARDUINO_TX);
 //Gets menu choice
 int choice;
 
@@ -19,7 +19,7 @@ void setup() {
   matrix.begin();
   matrix.fillScreen(matrix.Color333(0,0,0));
   //Music board init
-  mySerial.begin(9600);
+  mp3.begin(9600);
   delay(500);//Wait chip initialization is complete
   sendCommand(CMD_SEL_DEV, DEV_TF);//select the TF card
   delay(200);//wait for 200ms

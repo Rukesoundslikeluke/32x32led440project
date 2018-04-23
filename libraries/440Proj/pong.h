@@ -163,13 +163,20 @@ void pong(){
     lcd.print("Player 2:");
     matrix.drawLine(2,0,29,0,matrix.Color333(2,0,2));
     matrix.drawLine(2,31,29,31,matrix.Color333(2,0,2));
-    while(p1score < 3 && p2score < 3){
-        
+    while(p1score < 1 && p2score < 1){
         if(ballx < 1){win(2);}
         if(ballx >30){win(1);}
         moveplayers();
         moveball();
         delay(bspeed);
     }
+    matrix.setCursor(5, 9);    
+    matrix.setTextSize(1);
+    matrix.fillScreen(matrix.Color333(0, 0, 0));
+    matrix.setTextColor(matrix.Color333(0,2,2));
+    if(p1score == 3){ matrix.println(" P1");}
+    else{ matrix.println(" P2");}
+    matrix.setCursor(4, 17); 
+    matrix.println("WINS");
 }
 #endif

@@ -3,6 +3,7 @@
 #include <Globals.h>
 
 static int8_t Send_buf[8] = {0} ;
+static uint8_t ansbuf[10] = {0};
 
 void sendCommand(int8_t command, int16_t dat){
     delay(20);
@@ -15,7 +16,7 @@ void sendCommand(int8_t command, int16_t dat){
     Send_buf[6] = (int8_t)(dat); //datal
     Send_buf[7] = 0xef; //ending byte
     for(uint8_t i=0; i<8; i++){
-        mySerial.write(Send_buf[i]) ;
+        mp3.write(Send_buf[i]) ;
     }
 }
 #endif
