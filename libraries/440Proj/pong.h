@@ -163,7 +163,7 @@ void pong(){
     lcd.print("Player 2:");
     matrix.drawLine(2,0,29,0,matrix.Color333(2,0,2));
     matrix.drawLine(2,31,29,31,matrix.Color333(2,0,2));
-    while(p1score < 1 && p2score < 1){
+    while(p1score < 3 && p2score < 3){
         if(ballx < 1){win(2);}
         if(ballx >30){win(1);}
         moveplayers();
