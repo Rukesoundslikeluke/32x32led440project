@@ -13,3 +13,10 @@ Additional Parts:</br>
 Power bank that supports 2x 5.0v/2.0A</br>
 DC to usb cord</br>
 10k Potentiometer</br>
+
+Development Videos</br>
+Youtube links:</br>
+<a href="https://www.youtube.com/watch?v=e8c9xFMBzYg">Testing Joystick + Led array</a>
+<a href="https://www.youtube.com/watch?v=Voze0K6NlWU">Testing 2 players + Mounted Board</a>
+<a href="https://www.youtube.com/watch?v=3TRvqNAYjcc&feature=youtu.be">Full Showcase</a>
+<img alt="Case Image" src="https://github.com/Rukesoundslikeluke/32x32ledProject/blob/master/images/Case1.png">
